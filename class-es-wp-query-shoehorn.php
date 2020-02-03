@@ -185,6 +185,9 @@ class ES_WP_Query_Shoehorn {
 		$this->post_count          = $es_query->post_count;
 		$this->original_query_args = $query_args;
 		$this->add_query_hooks();
+
+		// VIP: store a reference to the es_query so we can check it later
+		$this->es_query = $es_query;
 	}
 
 	/**
@@ -252,6 +255,15 @@ class ES_WP_Query_Shoehorn {
 			$this->reboot_query_vars( $query );
 
 			if ( ! $this->post_count ) {
+				// VIP: Add temp debug to track when homepage quer(y|ies) fail.
+				if ( is_front_page() ) {
+					trigger_error( sprintf(
+						'es-wp-query: No posts returned from args %s with ES response %s #chive-homepage-debug',
+						is_object( $this->es_query ) ? json_encode( $this->es_query->es_args ) : '(es_query not found)',
+						is_object( $this->es_query ) ? json_encode( $this->es_query->es_response ) : '(es_query not found)'
+					), E_USER_WARNING );
+				}
+
 				global $wpdb;
 				return "SELECT * FROM {$wpdb->posts} WHERE 1=0 /* ES_WP_Query Shoehorn */";
 			} elseif ( ! empty( $sql ) ) {
