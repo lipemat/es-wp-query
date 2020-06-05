@@ -183,7 +183,9 @@ abstract class ES_WP_Query_Wrapper extends WP_Query {
 	 * @access public
 	 */
 	public function set_found_posts( $q, $es_response ) {
-		if ( isset( $es_response['hits']['total'] ) ) {
+		if ( isset( $es_response['hits']['total']['value'] ) ) {
+			$this->found_posts = absint( $es_response['hits']['total']['value'] );
+		} elseif ( isset( $es_response['hits']['total'] ) ) {
 			$this->found_posts = absint( $es_response['hits']['total'] );
 		} else {
 			$this->found_posts = 0;
